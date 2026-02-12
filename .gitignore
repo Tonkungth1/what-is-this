@@ -1,0 +1,33 @@
+# environment
+.env
+.env.*
+*.env
+
+# python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+venv/
+.envrc
+
+# fastapi / uvicorn
+*.log
+
+# node
+node_modules/
+dist/
+build/
+
+# docker
+*.tar
+
+# vscode
+.vscode/
+
+# mac
+.DS_Store
+
+# system
+Thumbs.db
