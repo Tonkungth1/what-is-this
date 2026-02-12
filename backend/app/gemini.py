@@ -58,7 +58,7 @@ async def analyze_image(file):
             params={"key": API_KEY},
             json=body,
             headers={"Content-Type":"application/json"},
-            timeout=60
+            timeout=30
         )
 
         print("STATUS:", res.status_code)
