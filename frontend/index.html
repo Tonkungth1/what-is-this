@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>นี่ตัวอะไร - AI ส่องสัตว์</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+--primary:#2E8B57;
+--bg:#F0FFF4;
+--accent:#FF7F50;
+--text:#2c3e50;
+}
+
+body{
+font-family:'Kanit',sans-serif;
+background:var(--bg);
+margin:0;
+display:flex;
+justify-content:center;
+align-items:center;
+min-height:100vh;
+}
+
+.container{
+background:white;
+width:90%;
+max-width:400px;
+padding:2rem;
+border-radius:20px;
+box-shadow:0 10px 25px rgba(0,0,0,.1);
+text-align:center;
+}
+
+h1{color:var(--primary);margin-bottom:.5rem}
+.subtitle{font-size:.9rem;color:#666;margin-bottom:2rem}
+
+.image-area{
+width:100%;
+height:250px;
+border:2px dashed #ddd;
+border-radius:15px;
+display:flex;
+justify-content:center;
+align-items:center;
+margin-bottom:1.5rem;
+background:#fafafa;
+overflow:hidden;
+}
+
+.image-area img{
+width:100%;
+height:100%;
+object-fit:cover;
+display:none;
+}
+
+.placeholder{color:#aaa;font-size:.9rem}
+
+.btn{
+border:none;
+color:white;
+background:var(--primary);
+padding:12px 30px;
+border-radius:50px;
+font-size:1rem;
+font-weight:600;
+cursor:pointer;
+}
+
+.result{
+background:var(--bg);
+padding:1rem;
+border-radius:10px;
+border-left:5px solid var(--primary);
+text-align:left;
+display:none;
+margin-top:1rem;
+white-space:pre-line;
+}
+
+.loader{
+border:4px solid #eee;
+border-top:4px solid var(--primary);
+border-radius:50%;
+width:30px;height:30px;
+animation:spin 1s linear infinite;
+display:none;
+margin:10px auto;
+}
+
+@keyframes spin{
+to{transform:rotate(360deg)}
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>🌿 นี่ตัวอะไร?</h1>
+<p class="subtitle">AI วิเคราะห์สัตว์จากภาพ</p>
+
+<div class="image-area">
+<span class="placeholder">📸 รูปจะแสดงตรงนี้</span>
+<img id="preview">
+</div>
+
+<input type="file" id="fileInput" accept="image/*" hidden>
+
+<button class="btn" onclick="pick()">📷 เลือกรูป</button>
+
+<div class="loader" id="loader"></div>
+
+<div class="result" id="result"></div>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
