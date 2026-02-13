@@ -1,126 +1,122 @@
-const input = document.getElementById("fileInput");
-const preview = document.getElementById("preview");
+const popup = document.getElementById("popup");
+const cameraPopup = document.getElementById("cameraPopup");
+const previewBox = document.getElementById("previewBox");
 const loader = document.getElementById("loader");
 const resultBox = document.getElementById("result");
-const placeholder = document.querySelector(".placeholder");
+const fileInput = document.getElementById("fileInput");
+const video = document.getElementById("video");
 
+let stream = null;
 let file = null;
 
-function pick() {
-  input.click();
+
+// ---------- popup ----------
+function openPopup(){
+  popup.style.display="flex";
+}
+function closePopup(){
+  popup.style.display="none";
 }
 
-input.addEventListener("change", () => {
-  file = input.files[0];
-  if (!file) return;
 
-  const reader = new FileReader();
+// ---------- gallery ----------
+function openGallery(){
+  closePopup();
+  fileInput.click();
+}
 
-  reader.onload = (e) => {
-    preview.src = e.target.result;
-    preview.style.display = "block";
-    placeholder.style.display = "none";
+fileInput.addEventListener("change",()=>{
+  file = fileInput.files[0];
+  if(!file) return;
+
+  const reader=new FileReader();
+  reader.onload=e=>{
+    previewBox.innerHTML=`<img src="${e.target.result}">`;
     analyze();
   };
-
   reader.readAsDataURL(file);
 });
 
-async function analyze() {
-  loader.style.display = "block";
-  resultBox.style.display = "none";
 
-  const form = new FormData();
-  form.append("file", file);
+// ---------- camera ----------
+async function startCamera(){
 
-  try {
-    const res = await fetch("http://localhost:8001/predict", {
-      method: "POST",
-      body: form,
+  closePopup();
+
+  try{
+    stream = await navigator.mediaDevices.getUserMedia({
+      video:{ facingMode:"user" },
+      audio:false
+    });
+  }catch{
+    // fallback เผื่อ browser ไม่รองรับ
+    stream = await navigator.mediaDevices.getUserMedia({video:true});
+  }
+
+  cameraPopup.style.display="flex";
+  video.srcObject=stream;
+}
+
+
+
+// ---------- capture ----------
+function capture(){
+
+  const canvas=document.createElement("canvas");
+  canvas.width=video.videoWidth;
+  canvas.height=video.videoHeight;
+
+  const ctx=canvas.getContext("2d");
+  ctx.drawImage(video,0,0);
+
+  canvas.toBlob(blob=>{
+    file = new File([blob],"photo.jpg",{type:"image/jpeg"});
+
+    previewBox.innerHTML=`<img src="${URL.createObjectURL(blob)}">`;
+
+    stream.getTracks().forEach(t=>t.stop());
+    cameraPopup.style.display="none";
+
+    analyze();
+  });
+}
+
+
+// ---------- send api ----------
+async function analyze(){
+
+  loader.style.display="block";
+  resultBox.style.display="none";
+
+  const form=new FormData();
+  form.append("file",file);
+
+  try{
+    const res=await fetch("http://localhost:8001/predict",{
+      method:"POST",
+      body:form
     });
 
-    const data = await res.json();
+    const data=await res.json();
 
-    loader.style.display = "none";
-    resultBox.style.display = "block";
-    let text = data.prediction.replace(
+    loader.style.display="none";
+    resultBox.style.display="block";
+
+    let text=data.prediction.replace(
       "สิ่งมีชีวิตในภาพคือ",
-      "<b>สิ่งมีชีวิตในภาพคือ</b>",
+      "<b>สิ่งมีชีวิตในภาพคือ</b>"
     );
 
-    text = text.replace(
+    text=text.replace(
       /: (.*)/,
-      ': <span style="font-size:20px;font-weight:600">$1</span>',
+      ': <span style="font-size:20px;font-weight:600">$1</span>'
     );
 
-    resultBox.innerHTML = text;
-  } catch (err) {
-    loader.style.display = "none";
-    alert("เชื่อมต่อเซิร์ฟเวอร์ไม่ได้");
+    resultBox.innerHTML=text;
+
+  }catch(err){
+    loader.style.display="none";
+    alert("เชื่อมต่อ API ไม่ได้");
     console.error(err);
   }
 }
-// ===== OPTION PICKER SYSTEM =====
-
-const optionBox = document.createElement("div");
-optionBox.style.marginTop = "15px";
-optionBox.style.display = "none";
-optionBox.innerHTML = `
-<button class="btn" id="camBtn">📸 ถ่ายรูป</button>
-<br><br>
-<button class="btn" id="galBtn">🖼 เลือกรูปจากเครื่อง</button>
-`;
-document.querySelector(".container").appendChild(optionBox);
-
-// สร้าง input กล้อง
-const cameraInput = document.createElement("input");
-cameraInput.type = "file";
-cameraInput.accept = "image/*";
-cameraInput.capture = "environment";
-cameraInput.hidden = true;
-document.body.appendChild(cameraInput);
-
-
-// override ปุ่ม pick เดิม
-function pick(){
-  optionBox.style.display = "block";
-}
-
-
-// ===== BUTTON EVENTS =====
-
-document.getElementById("camBtn").onclick = ()=>{
-  cameraInput.click();
-};
-
-document.getElementById("galBtn").onclick = ()=>{
-  input.click();
-};
-
-
-// ===== HANDLE CAMERA FILE =====
-cameraInput.addEventListener("change", ()=>{
-  file = cameraInput.files[0];
-  if(!file) return;
-
-  const reader = new FileReader();
-
-  reader.onload = e=>{
-    preview.src = e.target.result;
-    preview.style.display="block";
-    placeholder.style.display="none";
-    optionBox.style.display="none";
-    analyze();
-  };
-
-  reader.readAsDataURL(file);
-});
-
-
-// ===== HIDE OPTIONS WHEN SELECTED NORMAL FILE =====
-input.addEventListener("change", ()=>{
-  optionBox.style.display="none";
-});
-
-
-
