@@ -34,7 +34,7 @@ async function analyze() {
   form.append("file", file);
 
   try {
-    const res = await fetch("https://animal-api-6cvu.onrender.com/predict", {
+    const res = await fetch("http://localhost:8001/predict", {
       method: "POST",
       body: form,
     });
