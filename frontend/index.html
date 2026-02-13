@@ -111,12 +111,20 @@ to{transform:rotate(360deg)}
 </div>
 
 <input type="file" id="fileInput" accept="image/*" hidden>
+<input type="file" id="cameraInput" accept="image/*" capture="environment" hidden>
 
-<button class="btn" onclick="pick()">📷 เลือกรูป</button>
+
+<button class="btn" onclick="showOptions()">📷 เลือกรูป</button>
 
 <div class="loader" id="loader"></div>
 
 <div class="result" id="result"></div>
+<div id="optionBox" style="display:none;margin-top:15px">
+  <button class="btn" onclick="openCamera()">📸 ถ่ายรูป</button>
+  <br><br>
+  <button class="btn" onclick="openGallery()">🖼 เลือกจากเครื่อง</button>
+</div>
+
 
 </div>
 

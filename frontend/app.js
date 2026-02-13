@@ -60,3 +60,67 @@ async function analyze() {
     console.error(err);
   }
 }
+// ===== OPTION PICKER SYSTEM =====
+
+const optionBox = document.createElement("div");
+optionBox.style.marginTop = "15px";
+optionBox.style.display = "none";
+optionBox.innerHTML = `
+<button class="btn" id="camBtn">📸 ถ่ายรูป</button>
+<br><br>
+<button class="btn" id="galBtn">🖼 เลือกรูปจากเครื่อง</button>
+`;
+document.querySelector(".container").appendChild(optionBox);
+
+// สร้าง input กล้อง
+const cameraInput = document.createElement("input");
+cameraInput.type = "file";
+cameraInput.accept = "image/*";
+cameraInput.capture = "environment";
+cameraInput.hidden = true;
+document.body.appendChild(cameraInput);
+
+
+// override ปุ่ม pick เดิม
+function pick(){
+  optionBox.style.display = "block";
+}
+
+
+// ===== BUTTON EVENTS =====
+
+document.getElementById("camBtn").onclick = ()=>{
+  cameraInput.click();
+};
+
+document.getElementById("galBtn").onclick = ()=>{
+  input.click();
+};
+
+
+// ===== HANDLE CAMERA FILE =====
+cameraInput.addEventListener("change", ()=>{
+  file = cameraInput.files[0];
+  if(!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = e=>{
+    preview.src = e.target.result;
+    preview.style.display="block";
+    placeholder.style.display="none";
+    optionBox.style.display="none";
+    analyze();
+  };
+
+  reader.readAsDataURL(file);
+});
+
+
+// ===== HIDE OPTIONS WHEN SELECTED NORMAL FILE =====
+input.addEventListener("change", ()=>{
+  optionBox.style.display="none";
+});
+
+
+
