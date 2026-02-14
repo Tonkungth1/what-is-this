@@ -1,214 +1,224 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="th">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>นี่ตัวอะไร - AI ส่องสัตว์</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>นี่ตัวอะไร - AI ส่องสัตว์</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap"
+      rel="stylesheet"
+    />
 
-<style>
-body{
-font-family:'Kanit',sans-serif;
-background:#F0FFF4;
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
-margin:0;
-}
+    <style>
+      body {
+        font-family: "Kanit", sans-serif;
+        background: #f0fff4;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+      }
 
-.container{
-background:white;
-padding:30px;
-border-radius:20px;
-width:90%;
-max-width:420px;
-text-align:center;
-box-shadow:0 10px 25px rgba(0,0,0,.1);
-}
+      .container {
+        background: white;
+        padding: 30px;
+        border-radius: 20px;
+        width: 90%;
+        max-width: 420px;
+        text-align: center;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      }
 
-.image-area{
-height:250px;
-border:2px dashed #ddd;
-border-radius:15px;
-display:flex;
-justify-content:center;
-align-items:center;
-overflow:hidden;
-margin-bottom:20px;
-}
+      .image-area {
+        height: 250px;
+        border: 2px dashed #ddd;
+        border-radius: 15px;
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        align-items: center;
+        overflow: hidden;
+        margin-bottom: 20px;
+      }
 
-.image-area img{
-width:100%;
-height:100%;
-object-fit:cover;
-}
+      .image-area img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
 
-.btn{
-background:#2E8B57;
-color:white;
-border:none;
-padding:12px 25px;
-border-radius:50px;
-cursor:pointer;
-font-size:16px;
-}
+      .btn {
+        background: #2e8b57;
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 50px;
+        cursor: pointer;
+        font-size: 16px;
+      }
 
-.loader{
-border:4px solid #eee;
-border-top:4px solid #2E8B57;
-border-radius:50%;
-width:30px;
-height:30px;
-animation:spin 1s linear infinite;
-margin:15px auto;
-display:none;
-}
+      .loader {
+        border: 4px solid #eee;
+        border-top: 4px solid #2e8b57;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        animation: spin 1s linear infinite;
+        margin: 15px auto;
+        display: none;
+      }
 
-@keyframes spin{to{transform:rotate(360deg)}}
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
 
-.result{
-display:none;
-background:#F0FFF4;
-padding:15px;
-border-left:5px solid #2E8B57;
-border-radius:10px;
-margin-top:15px;
-text-align:left;
-}
+      .result {
+        display: none;
+        background: #f0fff4;
+        padding: 15px;
+        border-left: 5px solid #2e8b57;
+        border-radius: 10px;
+        margin-top: 15px;
+        text-align: left;
+      }
 
-/* popup select */
-.popup{
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:rgba(0,0,0,.4);
-display:none;
-justify-content:center;
-align-items:center;
-}
+      /* popup select */
+      .popup {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.4);
+        display: none;
+        justify-content: center;
+        align-items: center;
+      }
 
-.popup-card{
-background:white;
-padding:25px;
-border-radius:15px;
-width:250px;
-text-align:center;
-}
+      .popup-card {
+        background: white;
+        padding: 25px;
+        border-radius: 15px;
+        width: 250px;
+        text-align: center;
+      }
 
-.popup-card button{
-width:100%;
-margin:10px 0;
-padding:12px;
-border:none;
-border-radius:10px;
-background:#2E8B57;
-color:white;
-cursor:pointer;
-}
+      .popup-card button {
+        width: 100%;
+        margin: 10px 0;
+        padding: 12px;
+        border: none;
+        border-radius: 10px;
+        background: #2e8b57;
+        color: white;
+        cursor: pointer;
+      }
 
-/* popup camera */
-.camera-popup{
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:rgba(0,0,0,.6);
-display:none;
-justify-content:center;
-align-items:center;
-z-index:999;
-}
+      /* popup camera */
+      .camera-popup {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 999;
+      }
 
-.camera-card{
-background:white;
-padding:20px;
-border-radius:20px;
-text-align:center;
-animation:pop .2s ease;
-}
+      .camera-card {
+        background: white;
+        padding: 20px;
+        border-radius: 20px;
+        text-align: center;
+        animation: pop 0.2s ease;
+      }
 
-.camera-card video{
-width:350px;
-max-width:90vw;
-border-radius:15px;
-}
+      .camera-card video {
+        width: 350px;
+        max-width: 90vw;
+        border-radius: 15px;
+      }
 
-.snap{
-margin-top:15px;
-padding:12px 25px;
-background:#2E8B57;
-color:white;
-border:none;
-border-radius:50px;
-cursor:pointer;
-}
+      .snap {
+        margin-top: 15px;
+        padding: 12px 25px;
+        background: #2e8b57;
+        color: white;
+        border: none;
+        border-radius: 50px;
+        cursor: pointer;
+      }
 
-.close{
-margin-top:10px;
-background:#999;
-color:white;
-border:none;
-padding:8px 20px;
-border-radius:50px;
-cursor:pointer;
-}
+      .close {
+        margin-top: 10px;
+        background: #999;
+        color: white;
+        border: none;
+        padding: 8px 20px;
+        border-radius: 50px;
+        cursor: pointer;
+      }
 
-@keyframes pop{
-from{transform:scale(.8);opacity:0}
-to{transform:scale(1);opacity:1}
-}
-</style>
-</head>
+      @keyframes pop {
+        from {
+          transform: scale(0.8);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+    </style>
+  </head>
 
-<body>
+  <body>
+    <div class="container">
+      <h2>🌿 นี่ตัวอะไร?</h2>
 
-<div class="container">
+      <div class="image-area" id="previewBox">
+        <span>📸 รูปจะแสดงตรงนี้</span>
+        <p style="font-size: 13px; color: #888; margin-top: 10px">
+          💡 สามารถ Ctrl+V เพื่อวางรูปได้
+        </p>
+      </div>
 
-<h2>🌿 นี่ตัวอะไร?</h2>
+      <button class="btn" onclick="openPopup()">เลือกรูป</button>
 
-<div class="image-area" id="previewBox">
-<span>📸 รูปจะแสดงตรงนี้</span>
-<p style="font-size:13px;color:#888;margin-top:10px">
-💡 สามารถ Ctrl+V เพื่อวางรูปได้
-</p>
+      <div class="loader" id="loader"></div>
+      <div class="result" id="result"></div>
+    </div>
 
-</div>
+    <!-- popup เลือก -->
+    <div class="popup" id="popup">
+      <div class="popup-card">
+        <h3>เลือกรูปภาพ</h3>
+        <button onclick="startCamera()">📸 ถ่ายรูป</button>
+        <button onclick="openGallery()">🖼 เลือกรูปจากเครื่อง</button>
+        <button onclick="closePopup()">ยกเลิก</button>
+      </div>
+    </div>
 
-<button class="btn" onclick="openPopup()">เลือกรูป</button>
+    <!-- popup กล้อง -->
+    <div class="camera-popup" id="cameraPopup">
+      <div class="camera-card">
+        <video id="video" autoplay playsinline></video>
+        <br />
+        <button class="snap" onclick="capture()">📸 ถ่ายภาพ</button>
+        <br />
+        <button class="close" onclick="closeCamera()">ปิดกล้อง</button>
+      </div>
+    </div>
 
-<div class="loader" id="loader"></div>
-<div class="result" id="result"></div>
+    <input type="file" id="fileInput" accept="image/*" hidden />
 
-</div>
-
-<!-- popup เลือก -->
-<div class="popup" id="popup">
-  <div class="popup-card">
-    <h3>เลือกรูปภาพ</h3>
-    <button onclick="startCamera()">📸 ถ่ายรูป</button>
-    <button onclick="openGallery()">🖼 เลือกรูปจากเครื่อง</button>
-    <button onclick="closePopup()">ยกเลิก</button>
-  </div>
-</div>
-
-<!-- popup กล้อง -->
-<div class="camera-popup" id="cameraPopup">
-  <div class="camera-card">
-    <video id="video" autoplay playsinline></video>
-    <br>
-    <button class="snap" onclick="capture()">📸 ถ่ายภาพ</button>
-    <br>
-    <button class="close" onclick="closeCamera()">ปิดกล้อง</button>
-  </div>
-</div>
-
-<input type="file" id="fileInput" accept="image/*" hidden>
-
-<script src="app.js"></script>
-</body>
+    <script src="app.js"></script>
+  </body>
 </html>
