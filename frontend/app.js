@@ -139,7 +139,7 @@ async function analyze(){
 
     text=text.replace(
       /: (.*)/,
-      ': <span style="font-size:20px;font-weight:600">$1</span>'
+  ': <span style="font-size:20px;font-weight:600;color:#2E8B57">$1</span>'
     );
 
     result.innerHTML=text;
