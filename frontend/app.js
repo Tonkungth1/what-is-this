@@ -6,14 +6,29 @@ const resultBox = document.getElementById("result");
 const fileInput = document.getElementById("fileInput");
 const video = document.getElementById("video");
 
-let stream = null;
-let file = null;
+let stream=null;
+let file=null;
 
 
-// ---------- popup ----------
+// ---------- detect mobile ----------
+function isMobile(){
+  return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
+
+
+// ---------- open select ----------
 function openPopup(){
+
+  // ถ้าเป็นมือถือ → เปิดกล้องทันที
+  if(isMobile()){
+    startCamera();
+    return;
+  }
+
+  // ถ้าเป็น desktop → popup เลือก
   popup.style.display="flex";
 }
+
 function closePopup(){
   popup.style.display="none";
 }
@@ -26,7 +41,7 @@ function openGallery(){
 }
 
 fileInput.addEventListener("change",()=>{
-  file = fileInput.files[0];
+  file=fileInput.files[0];
   if(!file) return;
 
   const reader=new FileReader();
@@ -44,19 +59,26 @@ async function startCamera(){
   closePopup();
 
   try{
-    stream = await navigator.mediaDevices.getUserMedia({
+    stream=await navigator.mediaDevices.getUserMedia({
       video:{ facingMode:"user" },
       audio:false
     });
   }catch{
-    // fallback เผื่อ browser ไม่รองรับ
-    stream = await navigator.mediaDevices.getUserMedia({video:true});
+    stream=await navigator.mediaDevices.getUserMedia({video:true});
   }
 
   cameraPopup.style.display="flex";
   video.srcObject=stream;
 }
 
+
+// ---------- close camera ----------
+function closeCamera(){
+  if(stream){
+    stream.getTracks().forEach(t=>t.stop());
+  }
+  cameraPopup.style.display="none";
+}
 
 
 // ---------- capture ----------
@@ -70,13 +92,9 @@ function capture(){
   ctx.drawImage(video,0,0);
 
   canvas.toBlob(blob=>{
-    file = new File([blob],"photo.jpg",{type:"image/jpeg"});
-
+    file=new File([blob],"photo.jpg",{type:"image/jpeg"});
     previewBox.innerHTML=`<img src="${URL.createObjectURL(blob)}">`;
-
-    stream.getTracks().forEach(t=>t.stop());
-    cameraPopup.style.display="none";
-
+    closeCamera();
     analyze();
   });
 }

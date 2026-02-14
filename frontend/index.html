@@ -78,7 +78,7 @@ margin-top:15px;
 text-align:left;
 }
 
-/* popup เลือก */
+/* popup select */
 .popup{
 position:fixed;
 top:0;
@@ -110,37 +110,57 @@ color:white;
 cursor:pointer;
 }
 
-
-/* popup กล้อง */
+/* popup camera */
 .camera-popup{
 position:fixed;
 top:0;
 left:0;
 width:100%;
 height:100%;
-background:black;
+background:rgba(0,0,0,.6);
 display:none;
 justify-content:center;
 align-items:center;
-flex-direction:column;
 z-index:999;
 }
 
-.camera-popup video{
-width:90%;
-max-width:500px;
+.camera-card{
+background:white;
+padding:20px;
+border-radius:20px;
+text-align:center;
+animation:pop .2s ease;
+}
+
+.camera-card video{
+width:350px;
+max-width:90vw;
 border-radius:15px;
 }
 
 .snap{
-margin-top:20px;
-padding:15px 35px;
-font-size:18px;
+margin-top:15px;
+padding:12px 25px;
 background:#FF7F50;
 color:white;
 border:none;
 border-radius:50px;
 cursor:pointer;
+}
+
+.close{
+margin-top:10px;
+background:#999;
+color:white;
+border:none;
+padding:8px 20px;
+border-radius:50px;
+cursor:pointer;
+}
+
+@keyframes pop{
+from{transform:scale(.8);opacity:0}
+to{transform:scale(1);opacity:1}
 }
 </style>
 </head>
@@ -152,7 +172,7 @@ cursor:pointer;
 <h2>🌿 นี่ตัวอะไร?</h2>
 
 <div class="image-area" id="previewBox">
-<span id="placeholder">📸 รูปจะแสดงตรงนี้</span>
+<span>📸 รูปจะแสดงตรงนี้</span>
 </div>
 
 <button class="btn" onclick="openPopup()">เลือกรูป</button>
@@ -162,22 +182,25 @@ cursor:pointer;
 
 </div>
 
-
 <!-- popup เลือก -->
 <div class="popup" id="popup">
   <div class="popup-card">
     <h3>เลือกรูปภาพ</h3>
     <button onclick="startCamera()">📸 ถ่ายรูป</button>
-    <button onclick="openGallery()">🖼 เลือกจากเครื่อง</button>
+    <button onclick="openGallery()">🖼 เลือกรูปจากเครื่อง</button>
     <button onclick="closePopup()">ยกเลิก</button>
   </div>
 </div>
 
-
 <!-- popup กล้อง -->
 <div class="camera-popup" id="cameraPopup">
-  <video id="video" autoplay></video>
-  <button class="snap" onclick="capture()">📸 ถ่ายภาพ</button>
+  <div class="camera-card">
+    <video id="video" autoplay playsinline></video>
+    <br>
+    <button class="snap" onclick="capture()">📸 ถ่ายภาพ</button>
+    <br>
+    <button class="close" onclick="closeCamera()">ปิดกล้อง</button>
+  </div>
 </div>
 
 <input type="file" id="fileInput" accept="image/*" hidden>
