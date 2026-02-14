@@ -167,3 +167,27 @@ result.innerHTML = text.replace(/\n/g,"");
     alert("เชื่อมต่อ API ไม่ได้");
   }
 }
+
+
+// ---------------- PASTE IMAGE ----------------
+document.addEventListener("paste", e => {
+
+  const items = e.clipboardData.items;
+
+  for (let item of items) {
+
+    if (item.type.startsWith("image")) {
+
+      const blob = item.getAsFile();
+      file = new File([blob], "pasted.png", { type: blob.type });
+
+      const url = URL.createObjectURL(blob);
+
+      showPreview(url);
+      analyze();
+
+      break;
+    }
+  }
+
+});
