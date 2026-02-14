@@ -158,9 +158,9 @@ text = text.replace(
   /^- (.*)$/gm,
   '<div style="margin-left:15px">• $1</div>'
 );
-
-
-result.innerHTML = text.replace(/\n/g,"");
+  
+text = text.replace(/\n/g,"<br>");
+result.innerHTML = text
 
   }catch{
     loader.style.display="none";
