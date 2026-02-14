@@ -4,7 +4,11 @@ API_KEY = os.getenv("GEMINI_API_KEY")
 
 MODEL = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
 
-URL = f"https://generativelanguage.googleapis.com/v1/models/{MODEL}:generateContent"
+if not MODEL.startswith("models/"):
+    MODEL = "models/" + MODEL
+
+URL = f"https://generativelanguage.googleapis.com/v1/{MODEL}:generateContent"
+
 
 async def analyze_image(file):
 
