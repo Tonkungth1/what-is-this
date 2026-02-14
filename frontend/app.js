@@ -1,12 +1,14 @@
-const fileInput=document.getElementById("fileInput");
-const popup=document.getElementById("popup");
-const cameraPopup=document.getElementById("cameraPopup");
-const video=document.getElementById("video");
-const preview=document.getElementById("preview");
-const result=document.getElementById("result");
+const input = document.getElementById("fileInput");
+const preview = document.getElementById("preview");
+const loader = document.getElementById("loader");
+const resultBox = document.getElementById("result");
+const placeholder = document.querySelector(".placeholder");
+const popup = document.getElementById("selectPopup");
+const cameraModal = document.getElementById("cameraModal");
+const video = document.getElementById("video");
 
-let stream=null;
 let file=null;
+let stream=null;
 
 
 // ---------- detect mobile ----------
@@ -16,46 +18,43 @@ function isMobile(){
 
 
 // ---------- main button ----------
-function openSelect(){
+function pick(){
 
   if(isMobile()){
-    // มือถือ → เปิดแอปกล้องจริง
-    fileInput.setAttribute("capture","environment");
-    fileInput.click();
+    input.setAttribute("capture","environment");
+    input.click();
   }
   else{
-    // desktop → popup
     popup.style.display="flex";
   }
 }
 
 
-// ---------- choose file ----------
+// ---------- gallery ----------
 function openGallery(){
   popup.style.display="none";
-  fileInput.removeAttribute("capture");
-  fileInput.click();
+  input.removeAttribute("capture");
+  input.click();
 }
 
 
-// ---------- open notebook camera ----------
-async function openDesktopCamera(){
-
+// ---------- camera notebook ----------
+async function openCamera(){
   popup.style.display="none";
 
-  stream=await navigator.mediaDevices.getUserMedia({
-    video:{facingMode:"user"} // กล้องหน้า
+  stream = await navigator.mediaDevices.getUserMedia({
+    video:{facingMode:"user"}
   });
 
   video.srcObject=stream;
-  cameraPopup.style.display="flex";
+  cameraModal.style.display="flex";
 }
 
 
-// ---------- close ----------
+// ---------- close camera ----------
 function closeCamera(){
   if(stream) stream.getTracks().forEach(t=>t.stop());
-  cameraPopup.style.display="none";
+  cameraModal.style.display="none";
 }
 
 
@@ -65,45 +64,73 @@ function capture(){
   const canvas=document.createElement("canvas");
   canvas.width=video.videoWidth;
   canvas.height=video.videoHeight;
-
   canvas.getContext("2d").drawImage(video,0,0);
 
   canvas.toBlob(blob=>{
     file=new File([blob],"photo.jpg",{type:"image/jpeg"});
-
-    preview.innerHTML=`<img src="${URL.createObjectURL(blob)}">`;
-
+    showPreview(URL.createObjectURL(blob));
     closeCamera();
-    sendAPI();
+    analyze();
   });
 }
 
 
-// ---------- mobile file selected ----------
-fileInput.addEventListener("change",()=>{
-  file=fileInput.files[0];
+// ---------- file select ----------
+input.addEventListener("change",()=>{
+  file=input.files[0];
   if(!file) return;
 
   const reader=new FileReader();
   reader.onload=e=>{
-    preview.innerHTML=`<img src="${e.target.result}">`;
-    sendAPI();
+    showPreview(e.target.result);
+    analyze();
   };
   reader.readAsDataURL(file);
 });
 
 
-// ---------- API ----------
-async function sendAPI(){
+// ---------- preview ----------
+function showPreview(src){
+  preview.src=src;
+  preview.style.display="block";
+  placeholder.style.display="none";
+}
+
+
+// ---------- analyze ----------
+async function analyze(){
+
+  loader.style.display="block";
+  resultBox.style.display="none";
 
   const form=new FormData();
   form.append("file",file);
 
-  const res=await fetch("http://localhost:8001/predict",{
-    method:"POST",
-    body:form
-  });
+  try{
+    const res=await fetch("http://localhost:8001/predict",{
+      method:"POST",
+      body:form
+    });
 
-  const data=await res.json();
-  result.innerHTML=data.prediction;
+    const data=await res.json();
+
+    loader.style.display="none";
+    resultBox.style.display="block";
+
+    let text=data.prediction.replace(
+      "สิ่งมีชีวิตในภาพคือ",
+      "<b>สิ่งมีชีวิตในภาพคือ</b>"
+    );
+
+    text=text.replace(
+      /: (.*)/,
+      ': <span style="font-size:20px;font-weight:600">$1</span>'
+    );
+
+    resultBox.innerHTML=text;
+
+  }catch{
+    loader.style.display="none";
+    alert("เชื่อมต่อเซิร์ฟเวอร์ไม่ได้");
+  }
 }
