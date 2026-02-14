@@ -1,69 +1,83 @@
-const input = document.getElementById("fileInput");
-const preview = document.getElementById("preview");
-const loader = document.getElementById("loader");
-const resultBox = document.getElementById("result");
-const placeholder = document.querySelector(".placeholder");
-const popup = document.getElementById("selectPopup");
-const cameraModal = document.getElementById("cameraModal");
+const popup = document.getElementById("popup");
+const cameraPopup = document.getElementById("cameraPopup");
 const video = document.getElementById("video");
+const previewBox = document.getElementById("previewBox");
+const loader = document.getElementById("loader");
+const result = document.getElementById("result");
+const fileInput = document.getElementById("fileInput");
 
-let file=null;
-let stream=null;
+let stream = null;
+let file = null;
 
 
-// ---------- detect mobile ----------
+// ---------------- MOBILE CHECK ----------------
 function isMobile(){
   return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 }
 
 
-// ---------- main button ----------
-function pick(){
+// ---------------- POPUP ----------------
+function openPopup(){
+  popup.style.display="flex";
+}
 
-  if(isMobile()){
-    input.setAttribute("capture","environment");
-    input.click();
-  }
-  else{
-    popup.style.display="flex";
-  }
+function closePopup(){
+  popup.style.display="none";
 }
 
 
-// ---------- gallery ----------
+// ---------------- GALLERY ----------------
 function openGallery(){
-  popup.style.display="none";
-  input.removeAttribute("capture");
-  input.click();
+  closePopup();
+  fileInput.removeAttribute("capture");
+  fileInput.click();
 }
 
 
-// ---------- camera notebook ----------
-async function openCamera(){
-  popup.style.display="none";
+// ---------------- CAMERA ----------------
+async function startCamera(){
 
-  stream = await navigator.mediaDevices.getUserMedia({
-    video:{facingMode:"user"}
-  });
+  closePopup();
 
-  video.srcObject=stream;
-  cameraModal.style.display="flex";
+  // 📱 mobile → เปิดแอปกล้องจริง
+  if(isMobile()){
+    fileInput.setAttribute("capture","environment");
+    fileInput.click();
+    return;
+  }
+
+  // 💻 desktop → popup กล้อง
+  try{
+    stream = await navigator.mediaDevices.getUserMedia({
+      video:{ facingMode:"user" }
+    });
+
+    video.srcObject = stream;
+    cameraPopup.style.display="flex";
+
+  }catch(err){
+    alert("เปิดกล้องไม่ได้");
+    console.error(err);
+  }
 }
 
 
-// ---------- close camera ----------
+// ---------------- CLOSE CAMERA ----------------
 function closeCamera(){
-  if(stream) stream.getTracks().forEach(t=>t.stop());
-  cameraModal.style.display="none";
+  if(stream){
+    stream.getTracks().forEach(track=>track.stop());
+  }
+  cameraPopup.style.display="none";
 }
 
 
-// ---------- capture ----------
+// ---------------- CAPTURE ----------------
 function capture(){
 
   const canvas=document.createElement("canvas");
   canvas.width=video.videoWidth;
   canvas.height=video.videoHeight;
+
   canvas.getContext("2d").drawImage(video,0,0);
 
   canvas.toBlob(blob=>{
@@ -75,9 +89,10 @@ function capture(){
 }
 
 
-// ---------- file select ----------
-input.addEventListener("change",()=>{
-  file=input.files[0];
+// ---------------- FILE SELECT ----------------
+fileInput.addEventListener("change",()=>{
+
+  file=fileInput.files[0];
   if(!file) return;
 
   const reader=new FileReader();
@@ -89,25 +104,24 @@ input.addEventListener("change",()=>{
 });
 
 
-// ---------- preview ----------
+// ---------------- PREVIEW ----------------
 function showPreview(src){
-  preview.src=src;
-  preview.style.display="block";
-  placeholder.style.display="none";
+  previewBox.innerHTML=`<img src="${src}">`;
 }
 
 
-// ---------- analyze ----------
+// ---------------- API ----------------
 async function analyze(){
 
   loader.style.display="block";
-  resultBox.style.display="none";
+  result.style.display="none";
 
   const form=new FormData();
   form.append("file",file);
 
   try{
-    const res=await fetch("http://localhost:8001/predict",{
+
+    const res = await fetch("https://animal-api-6cvu.onrender.com/predict", {
       method:"POST",
       body:form
     });
@@ -115,22 +129,11 @@ async function analyze(){
     const data=await res.json();
 
     loader.style.display="none";
-    resultBox.style.display="block";
-
-    let text=data.prediction.replace(
-      "สิ่งมีชีวิตในภาพคือ",
-      "<b>สิ่งมีชีวิตในภาพคือ</b>"
-    );
-
-    text=text.replace(
-      /: (.*)/,
-      ': <span style="font-size:20px;font-weight:600">$1</span>'
-    );
-
-    resultBox.innerHTML=text;
+    result.style.display="block";
+    result.innerHTML=data.prediction;
 
   }catch{
     loader.style.display="none";
-    alert("เชื่อมต่อเซิร์ฟเวอร์ไม่ได้");
+    alert("เชื่อมต่อ API ไม่ได้");
   }
 }
