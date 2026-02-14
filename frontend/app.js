@@ -1,10 +1,9 @@
-const popup = document.getElementById("popup");
-const cameraPopup = document.getElementById("cameraPopup");
-const previewBox = document.getElementById("previewBox");
-const loader = document.getElementById("loader");
-const resultBox = document.getElementById("result");
-const fileInput = document.getElementById("fileInput");
-const video = document.getElementById("video");
+const fileInput=document.getElementById("fileInput");
+const popup=document.getElementById("popup");
+const cameraPopup=document.getElementById("cameraPopup");
+const video=document.getElementById("video");
+const preview=document.getElementById("preview");
+const result=document.getElementById("result");
 
 let stream=null;
 let file=null;
@@ -16,67 +15,46 @@ function isMobile(){
 }
 
 
-// ---------- open select ----------
-function openPopup(){
+// ---------- main button ----------
+function openSelect(){
 
-  // ถ้าเป็นมือถือ → เปิดกล้องทันที
   if(isMobile()){
-    startCamera();
-    return;
+    // มือถือ → เปิดแอปกล้องจริง
+    fileInput.setAttribute("capture","environment");
+    fileInput.click();
   }
-
-  // ถ้าเป็น desktop → popup เลือก
-  popup.style.display="flex";
-}
-
-function closePopup(){
-  popup.style.display="none";
+  else{
+    // desktop → popup
+    popup.style.display="flex";
+  }
 }
 
 
-// ---------- gallery ----------
+// ---------- choose file ----------
 function openGallery(){
-  closePopup();
+  popup.style.display="none";
+  fileInput.removeAttribute("capture");
   fileInput.click();
 }
 
-fileInput.addEventListener("change",()=>{
-  file=fileInput.files[0];
-  if(!file) return;
 
-  const reader=new FileReader();
-  reader.onload=e=>{
-    previewBox.innerHTML=`<img src="${e.target.result}">`;
-    analyze();
-  };
-  reader.readAsDataURL(file);
-});
+// ---------- open notebook camera ----------
+async function openDesktopCamera(){
 
+  popup.style.display="none";
 
-// ---------- camera ----------
-async function startCamera(){
+  stream=await navigator.mediaDevices.getUserMedia({
+    video:{facingMode:"user"} // กล้องหน้า
+  });
 
-  closePopup();
-
-  try{
-    stream=await navigator.mediaDevices.getUserMedia({
-      video:{ facingMode:"user" },
-      audio:false
-    });
-  }catch{
-    stream=await navigator.mediaDevices.getUserMedia({video:true});
-  }
-
-  cameraPopup.style.display="flex";
   video.srcObject=stream;
+  cameraPopup.style.display="flex";
 }
 
 
-// ---------- close camera ----------
+// ---------- close ----------
 function closeCamera(){
-  if(stream){
-    stream.getTracks().forEach(t=>t.stop());
-  }
+  if(stream) stream.getTracks().forEach(t=>t.stop());
   cameraPopup.style.display="none";
 }
 
@@ -88,53 +66,44 @@ function capture(){
   canvas.width=video.videoWidth;
   canvas.height=video.videoHeight;
 
-  const ctx=canvas.getContext("2d");
-  ctx.drawImage(video,0,0);
+  canvas.getContext("2d").drawImage(video,0,0);
 
   canvas.toBlob(blob=>{
     file=new File([blob],"photo.jpg",{type:"image/jpeg"});
-    previewBox.innerHTML=`<img src="${URL.createObjectURL(blob)}">`;
+
+    preview.innerHTML=`<img src="${URL.createObjectURL(blob)}">`;
+
     closeCamera();
-    analyze();
+    sendAPI();
   });
 }
 
 
-// ---------- send api ----------
-async function analyze(){
+// ---------- mobile file selected ----------
+fileInput.addEventListener("change",()=>{
+  file=fileInput.files[0];
+  if(!file) return;
 
-  loader.style.display="block";
-  resultBox.style.display="none";
+  const reader=new FileReader();
+  reader.onload=e=>{
+    preview.innerHTML=`<img src="${e.target.result}">`;
+    sendAPI();
+  };
+  reader.readAsDataURL(file);
+});
+
+
+// ---------- API ----------
+async function sendAPI(){
 
   const form=new FormData();
   form.append("file",file);
 
-  try{
-   const res = await fetch("https://animal-api-6cvu.onrender.com/predict", {
-      method:"POST",
-      body:form
-    });
+  const res=await fetch("http://localhost:8001/predict",{
+    method:"POST",
+    body:form
+  });
 
-    const data=await res.json();
-
-    loader.style.display="none";
-    resultBox.style.display="block";
-
-    let text=data.prediction.replace(
-      "สิ่งมีชีวิตในภาพคือ",
-      "<b>สิ่งมีชีวิตในภาพคือ</b>"
-    );
-
-    text=text.replace(
-      /: (.*)/,
-      ': <span style="font-size:20px;font-weight:600">$1</span>'
-    );
-
-    resultBox.innerHTML=text;
-
-  }catch(err){
-    loader.style.display="none";
-    alert("เชื่อมต่อ API ไม่ได้");
-    console.error(err);
-  }
+  const data=await res.json();
+  result.innerHTML=data.prediction;
 }
