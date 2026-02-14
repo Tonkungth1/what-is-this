@@ -142,7 +142,7 @@ async function analyze(){
       ': <span style="font-size:20px;font-weight:600">$1</span>'
     );
 
-    result.innerHTML=data.text;
+    result.innerHTML=text;
 
   }catch{
     loader.style.display="none";
