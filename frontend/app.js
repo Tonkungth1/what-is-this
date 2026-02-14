@@ -132,17 +132,35 @@ async function analyze(){
     loader.style.display="none";
     result.style.display="block";
 
-    let text=data.prediction.replace(
-      "สิ่งมีชีวิตในภาพคือ",
-      "<b>สิ่งมีชีวิตในภาพคือ</b>"
-    );
+   let text = data.prediction;
 
-    text=text.replace(
-      /: (.*)/,
+// ---- format กรณีสัตว์ตัวเดียว ----
+text = text.replace(
+  "สิ่งมีชีวิตในภาพคือ",
+  "<b>สิ่งมีชีวิตในภาพคือ</b>"
+);
+
+text = text.replace(
+  /: (.*)/,
   ': <span style="font-size:20px;font-weight:600;color:#2E8B57">$1</span>'
-    );
+);
 
-    result.innerHTML=text;
+
+// ---- format กรณีหลายตัว ----
+// ทำชื่อสัตว์แต่ละข้อเป็นสีเขียวตัวหนา
+text = text.replace(
+  /^\d+\.\s(.+)$/gm,
+  '<div style="margin-top:10px;font-weight:600;color:#2E8B57;font-size:18px">$&</div>'
+);
+
+// ทำ bullet ให้เว้นระยะสวย
+text = text.replace(
+  /^- (.*)$/gm,
+  '<div style="margin-left:15px">• $1</div>'
+);
+
+
+result.innerHTML = text.replace(/\n/g,"");
 
   }catch{
     loader.style.display="none";
