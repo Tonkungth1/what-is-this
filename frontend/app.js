@@ -39,14 +39,15 @@ async function startCamera(){
 
   closePopup();
 
-  // 📱 mobile → เปิดแอปกล้องจริง
+  // 📱 mobile → เปิดกล้องหลัง
   if(isMobile()){
-    fileInput.setAttribute("capture","environment");
+    fileInput.setAttribute("accept","image/*");
+    fileInput.setAttribute("capture","environment"); // กล้องหลัง
     fileInput.click();
     return;
   }
 
-  // 💻 desktop → popup กล้อง
+  // 💻 desktop → popup กล้องหน้า
   try{
     stream = await navigator.mediaDevices.getUserMedia({
       video:{ facingMode:"user" }
@@ -57,9 +58,9 @@ async function startCamera(){
 
   }catch(err){
     alert("เปิดกล้องไม่ได้");
-    console.error(err);
   }
 }
+
 
 
 // ---------------- CLOSE CAMERA ----------------
